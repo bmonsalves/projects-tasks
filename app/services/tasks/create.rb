@@ -32,7 +32,7 @@ module Tasks
       return {error: 'total subtareas excedido'} if days_tasks.size > Project::TOTAL_TASKS
 
       if workingdays.size >= Project::TOTAL_TASKS
-        return {error: 'dia ya tiene asignada una tarea'} unless task_params[:day].in?(days_tasks)
+        return {error: 'dia ya tiene asignada una tarea'} if init_date.in?(days_tasks)
       end
 
       parent_task.subtasks.find_or_create_by(task_params)
