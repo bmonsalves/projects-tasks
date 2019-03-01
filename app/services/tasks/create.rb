@@ -23,10 +23,13 @@ module Tasks
       workingdays = eval(project.workingdays)
       parent_task = Task.find_by(id: task_params[:parent_task_id], project_id: project.id)
 
+      init_date = DateTime.parse(task_params[:init_date])
+      return {error: 'el dia de inicio debe ser un dia laboral'} unless (init_date.wday - 1).in?(workingdays)
+      finish_date = DateTime.parse(task_params[:finish_date])
+      return {error: 'el dia de termino debe ser un dia laboral'} unless (finish_date.wday - 1).in?(workingdays)
+
       days_tasks = Task.days_subtasks(parent_task)
       return {error: 'total subtareas excedido'} if days_tasks.size > Project::TOTAL_TASKS
-
-      return {error: 'tarea en dia no laboral'} unless task_params[:day].in?(workingdays)
 
       if workingdays.size >= Project::TOTAL_TASKS
         return {error: 'dia ya tiene asignada una tarea'} unless task_params[:day].in?(days_tasks)
@@ -52,8 +55,9 @@ module Tasks
                   :title,
                   :description,
                   :project_id,
-                  :day,
-                  :parent_task_id)
+                  :parent_task_id,
+                  :init_date,
+                  :finish_date)
     end
 
 
