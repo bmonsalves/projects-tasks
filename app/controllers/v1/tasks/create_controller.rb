@@ -2,7 +2,7 @@ class V1::Tasks::CreateController < ApplicationController
 
   def create
     task_instance = ::Tasks::Create.new project: project
-    render json: {task: task_instance.create(task_params: params)}
+    make_response(task_instance.create(task_params: params))
   end
 
   private

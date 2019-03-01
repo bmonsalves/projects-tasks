@@ -3,4 +3,8 @@ class Project < ApplicationRecord
 
   TOTAL_TASKS = 5
 
+  def workingdays_list
+    eval(self.workingdays)
+  end
+
 end

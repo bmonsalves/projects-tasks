@@ -1,19 +1,22 @@
 module Projects
   class Create
-    def initialize
+    include ::Concerns::Messages
 
-    end
+    def initialize; end
 
     def create(params:)
       params = whitelist_params(params)
-      if 'id'.in?(params.keys)
-        Project.find(params[:id]).update(params)
-      else
-        Project.create(params)
-      end
+      project = if 'id'.in?(params.keys)
+                  Project.find(params[:id]).update(params)
+                else
+                  Project.create(params)
+                end
+
+      ImmutableStruct.new(:project)
+                     .new(project: project)
 
     rescue StandardError => e
-      e
+      error(message: e, code: 500)
     end
 
     private

@@ -1,5 +1,7 @@
 module Tasks
   class Create
+    include ::Concerns::Messages
+
     def initialize(project:)
       @project = project
     end
@@ -8,45 +10,59 @@ module Tasks
 
     def create (task_params:)
       @task_params = whitelist_params task_params
+      @workingdays = project.workingdays_list
+
       if @task_params[:parent_task_id].present?
-        split
-      else
-        create_task
+        return split
       end
+
+      create_task
     rescue StandardError => e
-      e
+      error(message: e, code: 500)
     end
 
     private
 
     def split
-      workingdays = eval(project.workingdays)
-      parent_task = Task.find_by(id: task_params[:parent_task_id], project_id: project.id)
 
-      init_date = DateTime.parse(task_params[:init_date])
-      return {error: 'el dia de inicio debe ser un dia laboral'} unless (init_date.wday - 1).in?(workingdays)
-      finish_date = DateTime.parse(task_params[:finish_date])
-      return {error: 'el dia de termino debe ser un dia laboral'} unless (finish_date.wday - 1).in?(workingdays)
+      parent_task = project.tasks.find_by(id: task_params[:parent_task_id])
+
+      init_date = validate_day(date: task_params[:init_date])
+      return init_date if init_date.respond_to?(:error)
+
+      finish_date = validate_day(date: task_params[:finish_date])
+      return finish_date if finish_date.respond_to?(:error)
 
       days_tasks = Task.days_subtasks(parent_task)
-      return {error: 'total subtareas excedido'} if days_tasks.size > Project::TOTAL_TASKS
+      return error(message: 'total subtareas excedido') if days_tasks.size > Project::TOTAL_TASKS
 
-      if workingdays.size >= Project::TOTAL_TASKS
-        return {error: 'dia ya tiene asignada una tarea'} if init_date.in?(days_tasks)
-      end
+      range_tasks = parent_task.subtask_per_day
+      return range_tasks if range_tasks.respond_to?(:error)
 
-      parent_task.subtasks.find_or_create_by(task_params)
+      new_subtask = parent_task.subtasks.create(task_params)
+      ImmutableStruct.new(:task)
+                     .new(task: new_subtask)
 
     rescue StandardError => e
-      e
+      error(message: e, code: 500)
+    end
+
+    def validate_day date:
+      error(message: 'fecha no valida') unless date.present?
+
+      day = DateTime.parse(date)
+      error(message: 'el dia de inicio o termino debe ser un dia laboral') unless (day.wday - 1).in?(@workingdays)
+
+      day
     end
 
     def create_task
 
-      Task.create(task_params)
+      ImmutableStruct.new(:task)
+                     .new(task: project.tasks.create(task_params))
 
     rescue StandardError => e
-      e
+      error(message: e, code: 500)
     end
 
     def whitelist_params(params)
@@ -59,7 +75,5 @@ module Tasks
                   :init_date,
                   :finish_date)
     end
-
-
   end
 end

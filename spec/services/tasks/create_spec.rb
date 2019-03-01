@@ -50,6 +50,7 @@ describe "create task" do
 
         task_instance = Tasks::Create.new project: @project
         task = task_instance.create(task_params: params)
+        p task
         expect(task.respond_to?(:id)).to eq(true)
       end
     end

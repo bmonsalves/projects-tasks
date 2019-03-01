@@ -5,6 +5,9 @@ ruby '2.6.1'
 
 gem 'pg'
 gem 'puma', '~> 3.11'
+gem 'immutable-struct'
+gem 'oj'
+gem 'oj_mimic_json'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '~> 5.2.2'
