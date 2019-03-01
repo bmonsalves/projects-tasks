@@ -34,11 +34,11 @@ si este atributo se incluye, creará una subtask para la tarea indicada
     {
     	"project_id": <ID DEL PROYECTO>,
     	"task":{
-    	  "project_id": <ID DEL PROYECTO>,
-    	  "title": "subtarea 1",
-          "description":"nueva subtarea",
-          "parent_task_id": <ID DE LA TAREA>,
-          "init_date":"2019-03-02",
-          "finish_date": "2019-03-07"
+    	    "project_id": <ID DEL PROYECTO>,
+    	    "title": "subtarea 1",
+                "description":"nueva subtarea",
+                "parent_task_id": <ID DE LA TAREA>,
+                "init_date":"2019-03-02",
+                "finish_date": "2019-03-07"
     	}
     }
